@@ -1,14 +1,14 @@
 main :: IO ()
 
 main = do
-    let input = ['a', 'b', 'c']
-    print (head (tail input))
+    -- арифметическая прогрессия
+    let n = take 20 [1,3..]
+    print n
 
-    let input = [['a', 'b'], ['c','d']]
-    print (head (tail (head input)))
+    -- генерация по формуле
+    let n = [2*n - 1 | n <- [1..20]]
+    print n
 
-    let input = [['a', 'c', 'd'], ['a','b']]
-    print (head (tail (head (tail input))))
-
-    let input = [['a','d'], ['b', 'c']]
-    print (head (head (tail input)))
+    -- итерация
+    let n = take 20 (iterate (+2) 1)
+    print n
