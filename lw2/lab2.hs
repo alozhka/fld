@@ -1,10 +1,13 @@
 module Main (main) where
 
 import System.IO
+import Text.Read (readMaybe)
 
 -- 0
 do_my_list :: Int -> [Int]
-do_my_list n = take n [n..]
+do_my_list n
+    | n < 0 = []
+    | otherwise = take n [n..]
 
 -- 1
 oddEven :: [a] -> [a]
@@ -13,8 +16,10 @@ oddEven xs = xs
 
 -- 2
 insert :: [a] -> a -> Int -> [a]
-insert xs a n | n <= 1  = a : xs
-insert [] a _           = [a]
+insert _ _ n
+    | n < 1 = error "Position must be equal or greater 1"
+insert xs a 1  = a : xs
+insert [] _ _           = error "Position is out of list range"
 insert (x:xs) a n       = x : insert xs a (n - 1)
 
 -- 3
@@ -46,27 +51,51 @@ sumF6 n = go 1
             | i > n = 0
             | otherwise = (n - i) + go (i + 1)
 
+-- вспомогательные
+readInt :: String -> IO Int
+readInt prompt = do
+    putStr prompt
+    line <- getLine
+    case readMaybe line of
+        Just v  -> return v
+        Nothing -> do
+            putStrLn "Ошибка: введите целое число"
+            readInt prompt
+
+readNonNegative :: String -> IO Int
+readNonNegative prompt = do
+    v <- readInt prompt
+    if v >= 0
+        then return v
+        else do
+            putStrLn "Ошибка: число должно быть неотрицательным"
+            readNonNegative prompt
+
+readInRange :: Int -> Int -> String -> IO Int
+readInRange lo hi prompt = do
+    v <- readInt prompt
+    if v >= lo && v <= hi
+        then return v
+        else do
+            putStrLn ("Ошибка: число должно быть в диапазоне " ++ show lo ++ ".." ++ show hi)
+            readInRange lo hi prompt
+
 main :: IO ()
 main = do
     hSetEncoding stdout utf8
     hSetBuffering stdout NoBuffering
 
-    putStr "N1: "
-    n1 <- readLn
+    n1 <- readNonNegative "N1: "
     let myList1 = do_my_list n1
 
-    putStr "N2: "
-    n2 <- readLn
+    n2 <- readNonNegative "N2: "
     let myList2 = do_my_list n2
 
-    putStr "Вставляемый элемент: "
-    a <- readLn
+    a <- readInt "Вставляемый элемент: "
 
-    putStr "Позиция: "
-    n <- readLn
+    n <- readInRange 1 (length myList1 + 1) "Позиция: "
 
-    putStr "Элемент для поиска: "
-    el <- readLn
+    el <- readInt "Элемент для поиска: "
 
     -- 0
     putStrLn ("0. do_my_list: " ++ show myList1)
