@@ -13,8 +13,7 @@ readInt prompt = do
 
 listnums :: Int -> [Int]
 listnums n
-    | n < 1 = n : listnums (n + 1)
-    | n == 1 = [1]
+    | n < 1 = []
     | otherwise = n : listnums (n - 1)
 
 main :: IO ()
