@@ -4,7 +4,6 @@ mysubst :: Eq a => [a] -> [a] -> [a]
 mysubst [] ys = []
 mysubst (x:xss) ys
     | x `elem` ys = mysubst xss ys
-    | x `elem` xss = mysubst xss ys
     | otherwise = x : mysubst xss ys
 
 main :: IO ()

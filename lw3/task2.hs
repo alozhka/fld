@@ -2,7 +2,7 @@ import System.IO
 
 secondlastlist :: [[a]] -> [a]
 secondlastlist [] = []
-secondlastlist ([]:xs) = secondlastlist xs
+secondlastlist ([]:xss) = secondlastlist xss
 secondlastlist (xs:xss) = last xs : secondlastlist xss
 
 main :: IO ()
