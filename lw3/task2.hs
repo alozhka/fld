@@ -10,5 +10,5 @@ main = do
     hSetEncoding stdout utf8
     hSetBuffering stdout NoBuffering
 
-    let sublists = [[1, 2, 3], [0, 22, -5], [111, 555, 777]]
+    let sublists = [[1, 2, 3], [0, 22, -5], [111, 555, 777]] :: [[Int]]
     print (secondlastlist sublists)
