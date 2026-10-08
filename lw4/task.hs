@@ -21,7 +21,8 @@ main = do
   putStrLn "\n2. isNumber: "
   print (MyModule.isNumber '5')
   print (MyModule.isNumber 'a')
-  print (MyModule.isNumber ' ')
+  print (MyModule.isNumber '½')
+  print (MyModule.isNumber 'Ⅻ')
 
   putStrLn "\n3. insert: "
   print (MyModule.insert 2 "two" map)

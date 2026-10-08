@@ -16,6 +16,7 @@ module MyModule (
 import Prelude hiding (splitAt, span, size, intToDigit)
 import qualified Data.Map as DataMap (Map, fromList, toList, foldr)
 import qualified Data.Set as DataSet (Set, fromList, toList)
+import Data.Char (generalCategory, GeneralCategory(..))
 
 -- 1. splitAt (Data.List)
 -- Тип:
@@ -31,9 +32,10 @@ splitAt n xs = (take n xs, drop n xs)
 -- * принимает символ типа Char,
 -- * возвращает логическое значение.
 -- Описание:
--- * Проверяет, является ли символ цифрой.
+-- * Проверяет, является ли символ числовым символом Unicode.
+-- * Подходят цифры, дроби, степени, римские цифры, цифры других письменностей.
 isNumber :: Char -> Bool
-isNumber c = c >= '0' && c <= '9'
+isNumber c = generalCategory c `elem` [DecimalNumber, LetterNumber, OtherNumber]
 
 -- 3. insert (Data.Map)
 -- Тип:
