@@ -7,11 +7,14 @@ module MyModule (
     isAscii,
     span,
     size,
-    intToDigit
+    intToDigit,
+    splitAt',
+    partition',
+    size'
 ) where
 
 import Prelude hiding (splitAt, span, size, intToDigit)
-import qualified Data.Map as DataMap (Map, fromList, toList)
+import qualified Data.Map as DataMap (Map, fromList, toList, foldr)
 import qualified Data.Set as DataSet (Set, fromList, toList)
 
 -- 1. splitAt (Data.List)
@@ -109,3 +112,31 @@ intToDigit n
     | n >= 0 && n <= 9   = toEnum (n + fromEnum '0')
     | n >= 10 && n <= 15 = toEnum (n - 10 + fromEnum 'a')
     | otherwise          = error ("intToDigit: not a digit " ++ show n)
+
+-- Альтернативные реализации
+
+-- 1'. splitAt через рекурсию
+-- * Основная версия проходит список дважды (take и drop).
+-- * Здесь список проходится один раз: отщепляем голову и рекурсивно делим хвост.
+splitAt' :: Int -> [a] -> ([a], [a])
+splitAt' n xs | n <= 0 = ([], xs)
+splitAt' _ []          = ([], [])
+splitAt' n (x:xs)      = (x : before, after)
+    where
+        (before, after) = splitAt' (n - 1) xs
+
+-- 4'. partition через foldr
+-- * Основная версия проходит список дважды и вычисляет предикат для каждого элемента 2 раза.
+-- * Здесь за один проход каждый элемент кладется в нужный список аккумулятора.
+partition' :: (a -> Bool) -> [a] -> ([a], [a])
+partition' p = foldr select ([], [])
+    where
+        select x ~(yes, no)
+            | p x       = (x : yes, no)
+            | otherwise = (yes, x : no)
+
+-- 8'. size через свертку словаря
+-- * Основная версия сначала превращает словарь в список, а затем считает его длину.
+-- * Здесь словарь сворачивается напрямую: каждое значение увеличивает счетчик на 1.
+size' :: DataMap.Map k v -> Int
+size' map = DataMap.foldr (\_ count -> count + 1) 0 map

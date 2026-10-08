@@ -57,3 +57,20 @@ main = do
   print (MyModule.intToDigit 5)
   print (MyModule.intToDigit 10)
   print (MyModule.intToDigit 15)
+
+  putStrLn "\n--- Альтернативные реализации ---"
+
+  putStrLn "\n1'. splitAt': "
+  print (MyModule.splitAt' 3 l1)
+  print (MyModule.splitAt' (-1) l1)
+  print (MyModule.splitAt' 10 "hello")
+
+  putStrLn "\n4'. partition': "
+  print (MyModule.partition' even l2)
+  print (MyModule.partition' (> 15) l1)
+  print (MyModule.partition' (`elem` "aeiou") "haskell")
+
+  putStrLn "\n8'. size': "
+  print (MyModule.size' map)
+  print (MyModule.size' (MyModule.insert 2 "two" map))
+  print (MyModule.size' (Data.Map.empty :: Data.Map.Map Int String))

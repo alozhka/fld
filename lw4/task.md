@@ -42,3 +42,8 @@
 2. span (Data.List)
 3. size (Data.Map)
 4. intToDigit (Data.Char)
+
+Альтернативные реализации:
+1. splitAt' — через рекурсию
+2. partition' — через foldr
+3. size' — через свертку словаря (Data.Map.foldr)
