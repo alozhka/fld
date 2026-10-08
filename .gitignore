@@ -23,4 +23,5 @@ cabal.project.local~
 .ghc.environment.*
 
 # Unix executables
+lw*/task
 lw*/task[0-9]
