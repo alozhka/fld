@@ -1,6 +1,10 @@
 import System.IO
 import System.Environment (getArgs)
 import Text.Read (readMaybe)
+import Control.Monad (forM_)
+import System.Directory (doesFileExist)
+
+-- todo: проверку на наличие файла вынести до меню
 
 printUsage :: IO ()
 printUsage = putStrLn "Usage: task3 <inputFile>"
@@ -17,11 +21,29 @@ chooseFile files = do
         Just n | 0 < n && n <= length files -> return (files !! (n - 1))
         _ -> putStrLn "Error: Invalid file number" >> chooseFile files
 
+readLines :: FilePath -> IO [String]
+readLines file = do
+    exists <- doesFileExist file
+    if exists
+        then fmap lines (readFile' file)
+        else return []
+
+-- функции из меню
 view :: FilePath -> IO ()
-view file = putStrLn ("view " ++ file)
+view file = do
+    lines <- readLines file
+    if null lines
+        then putStrLn "(File is empty)"
+        else do
+            putStrLn "------(content)------"
+            mapM_ (\l -> putStrLn l) lines
+            putStrLn "---------------------"
 
 append :: FilePath -> IO ()
-append file = putStrLn ("append " ++ file)
+append file = do
+    line <- prompt "Enter line to append: "
+    appendFile file (line ++ "\n")
+    putStrLn "Appended."
 
 delete :: FilePath -> IO ()
 delete file = putStrLn ("delete " ++ file)
@@ -31,8 +53,8 @@ copy file = putStrLn ("copy " ++ file)
 
 menu :: FilePath -> IO ()
 menu file = do
-    putStrLn ("File: " ++ file)
-    putStrLn ("\nChoose the operation: 1) view 2) append line 3) delete line 4) copy with filter 0) exit")
+    putStrLn ("\nFile: " ++ file)
+    putStrLn ("Choose the operation: 1) view 2) append line 3) delete line 4) copy with filter 0) exit")
     choice <- prompt "> "
 
     case choice of
