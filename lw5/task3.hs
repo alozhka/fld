@@ -28,6 +28,9 @@ readLines file = do
         then fmap lines (readFile' file)
         else return []
 
+deleteLine :: Int -> [String] -> [String]
+deleteLine n lines = [line | (lineNumber, line) <- zip [1..] lines, lineNumber /= n]
+
 -- функции из меню
 view :: FilePath -> IO ()
 view file = do
@@ -46,10 +49,17 @@ append file = do
     putStrLn "Appended."
 
 delete :: FilePath -> IO ()
-delete file = putStrLn ("delete " ++ file)
+delete file = do
+    lines <- readLines file
+    str <- prompt "Enter line number to delete: "
+    case readMaybe str of
+        Just lineNo | 1 <= lineNo && lineNo <= length lines -> do
+            writeFile file (unlines (deleteLine lineNo lines))
+            putStrLn ("Line " ++ show lineNo ++ " was deleted")
+        _ -> putStrLn "Error: Invalid line number" >> delete file
 
-copy :: FilePath -> IO ()
-copy file = putStrLn ("copy " ++ file)
+copyWithFilter :: FilePath -> IO ()
+copyWithFilter file = putStrLn ("copy " ++ file)
 
 menu :: FilePath -> IO ()
 menu file = do
@@ -61,7 +71,7 @@ menu file = do
         "1" -> view file >> menu file
         "2" -> append file >> menu file
         "3" -> delete file >> menu file
-        "4" -> copy file >> menu file
+        "4" -> copyWithFilter file >> menu file
         "0" -> putStrLn "Exitting..."
         _ -> putStrLn "Error: Invalid option" >> menu file
 
