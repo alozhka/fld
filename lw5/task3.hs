@@ -1,5 +1,5 @@
 import Data.List (isInfixOf)
-import System.Directory (doesFileExist)
+import System.Directory (canonicalizePath, doesFileExist)
 import System.Environment (getArgs)
 import System.IO
 import Text.Read (readMaybe)
@@ -30,6 +30,9 @@ readLines file = do
 
 deleteLine :: Int -> [String] -> [String]
 deleteLine n ls = [line | (lineNumber, line) <- zip [1 ..] ls, lineNumber /= n]
+
+isSameFile :: FilePath -> FilePath -> IO Bool
+isSameFile a b = (==) <$> canonicalizePath a <*> canonicalizePath b
 
 filterBySubstring :: String -> [String] -> [String]
 filterBySubstring substr = filter (substr `isInfixOf`)
@@ -71,26 +74,30 @@ delete file = do
 copyWithFilter :: FilePath -> IO ()
 copyWithFilter file = do
   newFile <- prompt "Enter new file name: "
-  putStrLn "Choose filter:\n1) lines containing a substring\n2) lines more than N characters"
-  filterChoice <- prompt "> "
-  ls <- readLines file
+  same <- isSameFile file newFile
+  if same
+    then putStrLn "Error: new file must differ from the source file"
+    else do
+      putStrLn "Choose filter:\n1) lines containing a substring\n2) lines more than N characters"
+      filterChoice <- prompt "> "
 
-  result <- case filterChoice of
-    "1" -> do
-      substr <- prompt "Enter substring: "
-      return (Just (filterBySubstring substr ls))
-    "2" -> do
-      minN <- prompt "Enter N: "
-      case readMaybe minN of
-        Just n -> return (Just (filterByLength n ls))
-        Nothing -> return Nothing
-    _ -> return Nothing
+      result <- case filterChoice of
+        "1" -> do
+          substr <- prompt "Enter substring: "
+          return (Just (filterBySubstring substr))
+        "2" -> do
+          minN <- prompt "Enter N: "
+          case readMaybe minN of
+            Just n | n >= 0 -> return (Just (filterByLength n))
+            _ -> return Nothing
+        _ -> return Nothing
 
-  case result of
-    Just filteredLines -> do
-      writeFile newFile (unlines filteredLines)
-      putStrLn ("Filtered lines copied to " ++ newFile)
-    Nothing -> putStrLn "Error: Invalid input"
+      case result of
+        Just applyFilter -> do
+          ls <- readLines file
+          writeFile newFile (unlines (applyFilter ls))
+          putStrLn ("Filtered lines copied to " ++ newFile)
+        Nothing -> putStrLn "Error: Invalid input"
 
 menu :: FilePath -> IO ()
 menu file = do
@@ -115,4 +122,10 @@ main = do
 
   if null args
     then printUsage
-    else chooseFile args >>= menu
+    else do
+      file <- chooseFile args
+      exists <- doesFileExist file
+      if not exists
+        then putStrLn ("Warning: file " ++ file ++ " does not exist, it will be created when you append a line")
+        else return ()
+      menu file
