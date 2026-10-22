@@ -9,20 +9,16 @@ readInt prompt = do
     Just x -> return x
     Nothing -> putStrLn "Error: enter an integer" >> readInt prompt
 
-firstMultiple :: Int -> Int -> Int
-firstMultiple start k = ((start + k - 1) `div` k) * k
-
 multiples :: Int -> Int -> Int -> [Int]
-multiples start n k = take n [firstMultiple start k, firstMultiple start k + k ..]
+multiples start n k = take n (filter (\x -> x `mod` k == 0) [start ..])
 
 printMultiples :: Int -> Int -> Int -> IO ()
 printMultiples start n k =
   if k <= 0 || n < 0
     then putStrLn "Error: multiplicity must be positive and amount must be non-negative"
     else do
-      let first = firstMultiple start k
-      if first /= start
-        then putStrLn ("Note: " ++ show start ++ " is not a multiple of " ++ show k ++ ", starting from " ++ show first)
+      if start `mod` k /= 0
+        then putStrLn ("Note: " ++ show start ++ " is not a multiple of " ++ show k)
         else return ()
       print (multiples start n k)
 

@@ -1,7 +1,7 @@
 import Data.Char (isPunctuation)
 import System.Environment (getArgs)
 import System.IO
-import System.Directory (doesFileExist)
+import System.Directory (canonicalizePath, doesFileExist)
 import Control.Exception (IOException, catch)
 
 printUsage :: IO ()
@@ -27,8 +27,11 @@ main = do
   case args of
     [input, output] -> do
       exists <- doesFileExist input
+      sameFile <- (==) <$> canonicalizePath input <*> canonicalizePath output
       if not exists
         then putStrLn "Error: input file does not exist"
+      else if sameFile
+        then putStrLn "Error: output file must differ from input file"
         else do
           putStr "Replacement character: "
           line <- getLine
