@@ -21,11 +21,9 @@ printMultiples start n k =
     then putStrLn "Error: multiplicity must be positive and amount must be non-negative"
     else do
       let first = firstMultiple start k
-          if first /= start
-            then
-              putStrLn "Error: no multiples found"
-            else
-              return ()
+      if first /= start
+        then putStrLn ("Note: " ++ show start ++ " is not a multiple of " ++ show k ++ ", starting from " ++ show first)
+        else return ()
       print (multiples start n k)
 
 main :: IO ()
@@ -33,8 +31,8 @@ main = do
   hSetEncoding stdout utf8
   hSetBuffering stdout NoBuffering
 
-  start <- readInt "Print initial value: "
-  n <- readInt "Print elements amount: "
-  k <- readInt "Print multiplicity: "
+  start <- readInt "Enter initial value: "
+  n <- readInt "Enter elements amount: "
+  k <- readInt "Enter multiplicity: "
 
   printMultiples start n k
