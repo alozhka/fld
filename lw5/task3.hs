@@ -1,12 +1,13 @@
-import Control.Monad (forM_)
 import Data.List (isInfixOf)
 import System.Directory (doesFileExist)
 import System.Environment (getArgs)
 import System.IO
 import Text.Read (readMaybe)
 
+-- вспомогательные функции
+
 printUsage :: IO ()
-printUsage = putStrLn "Usage: task3 <inputFile>"
+printUsage = putStrLn "Usage: task3 <file1> [<file2> ...]"
 
 prompt :: String -> IO String
 prompt msg = putStr msg >> getLine
@@ -28,7 +29,7 @@ readLines file = do
     else return []
 
 deleteLine :: Int -> [String] -> [String]
-deleteLine n lines = [line | (lineNumber, line) <- zip [1 ..] lines, lineNumber /= n]
+deleteLine n ls = [line | (lineNumber, line) <- zip [1 ..] ls, lineNumber /= n]
 
 filterBySubstring :: String -> [String] -> [String]
 filterBySubstring substr = filter (substr `isInfixOf`)
@@ -37,14 +38,15 @@ filterByLength :: Int -> [String] -> [String]
 filterByLength n = filter ((> n) . length)
 
 -- функции из меню
+
 view :: FilePath -> IO ()
 view file = do
-  lines <- readLines file
-  if null lines
+  ls <- readLines file
+  if null ls
     then putStrLn "(File is empty)"
     else do
       putStrLn "------(content)------"
-      mapM_ (\l -> putStrLn l) lines
+      mapM_ putStrLn ls
       putStrLn "---------------------"
 
 append :: FilePath -> IO ()
@@ -55,35 +57,40 @@ append file = do
 
 delete :: FilePath -> IO ()
 delete file = do
-  lines <- readLines file
-  str <- prompt "Enter line number to delete: "
-  case readMaybe str of
-    Just lineNo | 1 <= lineNo && lineNo <= length lines -> do
-      writeFile file (unlines (deleteLine lineNo lines))
-      putStrLn ("Line " ++ show lineNo ++ " was deleted")
-    _ -> putStrLn "Error: Invalid line number" >> delete file
+  ls <- readLines file
+  if null ls
+    then putStrLn "Error: file is empty"
+    else do
+      str <- prompt "Enter line number to delete: "
+      case readMaybe str of
+        Just lineNo | 1 <= lineNo && lineNo <= length ls -> do
+          writeFile file (unlines (deleteLine lineNo ls))
+          putStrLn ("Line " ++ show lineNo ++ " was deleted")
+        _ -> putStrLn "Error: Invalid line number"
 
 copyWithFilter :: FilePath -> IO ()
 copyWithFilter file = do
   newFile <- prompt "Enter new file name: "
   putStrLn "Choose filter:\n1) lines containing a substring\n2) lines more than N characters"
   filterChoice <- prompt "> "
-  lines <- readLines file
+  ls <- readLines file
 
   result <- case filterChoice of
     "1" -> do
       substr <- prompt "Enter substring: "
-      return (Just (filterBySubstring substr lines))
+      return (Just (filterBySubstring substr ls))
     "2" -> do
-      maxN <- prompt "Enter max N: "
-      return (Just (filterByLength (read maxN) lines))
+      minN <- prompt "Enter N: "
+      case readMaybe minN of
+        Just n -> return (Just (filterByLength n ls))
+        Nothing -> return Nothing
     _ -> return Nothing
 
   case result of
     Just filteredLines -> do
       writeFile newFile (unlines filteredLines)
       putStrLn ("Filtered lines copied to " ++ newFile)
-    Nothing -> putStrLn "Error: Invalid filter choice" >> copyWithFilter file
+    Nothing -> putStrLn "Error: Invalid input"
 
 menu :: FilePath -> IO ()
 menu file = do
