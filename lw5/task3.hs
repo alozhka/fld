@@ -3,6 +3,7 @@ import System.Environment (getArgs)
 import Text.Read (readMaybe)
 import Control.Monad (forM_)
 import System.Directory (doesFileExist)
+import Data.List (isInfixOf)
 
 -- todo: проверку на наличие файла вынести до меню
 
@@ -31,6 +32,11 @@ readLines file = do
 deleteLine :: Int -> [String] -> [String]
 deleteLine n lines = [line | (lineNumber, line) <- zip [1..] lines, lineNumber /= n]
 
+filterBySubstring :: String -> [String] -> [String]
+filterBySubstring substr = filter (substr `isInfixOf`)
+
+filterByLength :: Int -> [String] -> [String]
+filterByLength n = filter ((>n) . length)
 -- функции из меню
 view :: FilePath -> IO ()
 view file = do
@@ -59,7 +65,27 @@ delete file = do
         _ -> putStrLn "Error: Invalid line number" >> delete file
 
 copyWithFilter :: FilePath -> IO ()
-copyWithFilter file = putStrLn ("copy " ++ file)
+copyWithFilter file = do
+    newFile <-prompt "Enter new file name: "
+    putStrLn "Choose filter:\n1) lines containing a substring\n2) lines more than N characters"
+    filterChoice <- prompt "> "
+    lines <- readLines file
+
+    result <- case filterChoice of
+        "1" -> do
+            substr <- prompt "Enter substring: "
+            return (Just (filterBySubstring substr lines))
+        "2" -> do
+            maxN <- prompt "Enter max N: "
+            return (Just (filterByLength (read maxN) lines))
+        _ -> return Nothing
+    
+    case result of
+        Just filteredLines -> do
+            writeFile newFile (unlines filteredLines)
+            putStrLn ("Filtered lines copied to " ++ newFile)
+        Nothing -> putStrLn "Error: Invalid filter choice" >> copyWithFilter file
+
 
 menu :: FilePath -> IO ()
 menu file = do
@@ -72,7 +98,7 @@ menu file = do
         "2" -> append file >> menu file
         "3" -> delete file >> menu file
         "4" -> copyWithFilter file >> menu file
-        "0" -> putStrLn "Exitting..."
+        "0" -> putStrLn "Exiting..."
         _ -> putStrLn "Error: Invalid option" >> menu file
 
 main :: IO ()
