@@ -25,3 +25,5 @@ cabal.project.local~
 # Unix executables
 lw*/task
 lw*/task[0-9]
+
+.DS_Store
