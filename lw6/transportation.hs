@@ -43,18 +43,31 @@ solve start goal
               visited' = Set.union visited (Set.fromList notVisited)
            in search (queue ++ paths) visited'
 
-main :: IO ()
-main = do
-  hSetEncoding stdout utf8
-  hSetBuffering stdout NoBuffering
-
-  case solve [L, L, L, L] [R, R, R, R] of
+findSolution :: String -> State -> State -> IO ()
+findSolution description start goal = do
+  putStrLn ("\n" ++ description)
+  putStrLn ("Начало: " ++ show start ++ "; цель: " ++ show goal)
+  case solve start goal of
+    Nothing
+      | not (isRouteSafe goal) ->
+          putStrLn "Решения нет: конечное состояние небезопасно."
     Nothing -> putStrLn "Решение не найдено."
     Just path -> do
-      putStrLn "Порядок: [фермер, волк, козёл, капуста]"
-      putStrLn "L — левый берег, R — правый берег"
-      mapM_ printStep (zip [0 ..] path)
+      mapM_ printStep (zip [0..] path)
       putStrLn ("Количество переправ: " ++ show (length path - 1))
   where
     printStep (number, state) =
       putStrLn (show number ++ ": " ++ show state)
+
+main :: IO ()
+main = do
+  hSetEncoding stdout utf8
+  hSetBuffering stdout NoBuffering
+  putStrLn "Порядок: [фермер, волк, козёл, капуста]"
+  putStrLn "L — левый берег, R — правый берег"
+
+  findSolution "a) Перевезти всех на другой берег" [L, L, L, L] [R, R, R, R]
+  findSolution "b) Перевезти всех и вернуться одному" [L, L, L, L] [L, R, R, R]
+  findSolution "c) Перевезти волка и козла; капуста уже справа" [L, L, L, R] [R, R, R, R]
+  findSolution "d) Перевезти волка и козла; капусту оставить слева" [L, L, L, L] [R, R, R, L]
+  findSolution "e) Перевезти волка и капусту; козёл уже справа" [L, L, R, L] [R, R, R, R]
