@@ -15,7 +15,11 @@ transport R = L
 
 isRouteSafe :: State -> Bool
 isRouteSafe [f, w, g, c] =
-  (w /= g || f == g) && (g /= c || f == g)
+  not (wolfCanEatGoat || goatCanEatCabbage)
+  where
+    wolfCanEatGoat = w == g && farmerNotWithGoat
+    goatCanEatCabbage = g == c && farmerNotWithGoat
+    farmerNotWithGoat = f /= g
 isRouteSafe _ = False
 
 availableTransportations :: State -> [State]
